@@ -1,0 +1,15 @@
+---
+plugins:
+    - Abstract
+    - Authors:
+        authors:
+            - Yanick Champoux
+    - Methods
+    - Sort:
+        order:
+            - NAME
+            - SYNOPSIS
+            - DESCRIPTION
+            - METHODS
+            - '*'
+            - AUTHORS
