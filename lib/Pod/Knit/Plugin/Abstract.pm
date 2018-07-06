@@ -5,12 +5,10 @@ use warnings;
 
 use Log::Any '$log', prefix => 'Knit::Abstract: ';
 
-use XML::Writer::Simpler;
-
 use Moose;
 
 extends 'Pod::Knit::Plugin'; 
-with 'Pod::Knit::DOM::WebQuery';
+with 'Pod::Knit::DOM::Mojo';
 
 use experimental qw/
     signatures
@@ -28,18 +26,12 @@ sub munge($self,$doc) {
         ( $abstract ) = /^ \s* \# \s* ABSTRACT: \s* (.*?) $/mx;
     }
 
-    my $section = XML::Writer::Simpler->new( OUTPUT => 'self' );
-
     no warnings 'uninitialized';
 
-    $section->tag( section => sub {
-            $section->tag( 'section', [ class => 'name' ], sub {
-                $section->tag( 'head1' => 'NAME' );
-                $section->tag( 'para' => join ' - ', grep { $_ } $package, $abstract );
-            });
-    });
+    $doc->find_or_create_section( 'NAME', 1, undef, 
+        para => join ' - ', grep { $_ } $package, $abstract 
+    );
 
-    $doc->dom->append( $section->to_string );
 }
 
 
