@@ -1,11 +1,18 @@
 package Pod::Knit::Plugin::Sort;
+# ABSTRACT: Reorder sections
 
+use 5.10.0;
 use strict;
 use warnings;
 
+use List::AllUtils qw/ part /;
+
 use Moose;
 
-with 'Pod::Knit::Plugin';
+extends 'Pod::Knit::Plugin';
+with 'Pod::Knit::DOM::WebQuery';
+
+use experimental 'signatures', 'postderef';
 
 has "order" => (
     isa => 'ArrayRef',
@@ -16,23 +23,21 @@ has "order" => (
     },
 );
 
-sub transform {
-    my( $self, $doc ) = @_;
+sub munge( $self, $doc ) {
 
-    my $i = 1;
-    my %rank = map { uc($_) => $i++ } @{ $self->order };
-    $rank{'*'} ||= $i;   # not given? all last
+    my $sections = $doc->dom->find( 'head1' )->map(sub{ $_->parent });
 
-    my %sections;
-    $doc->find('head1')->each(sub{
-            $_->detach;
+    my $i = 0;
+    my %index = map { $_ => $i++ } $self->order->@*;
+    my $rest = $index{'*'} || $i;
 
-            my $title = uc $_->find('title')->first->text =~ s/^\s+|\s+$//gr;
-            $sections{$title} = $_;
-    });
+    my @order = 
+        map { $_ ? @$_ : () } 
+        part { $index{ $_->find('head1')->text } // $rest } @$sections;
 
-    for my $s ( sort { ($rank{$a}||$rank{'*'}) <=> ($rank{$b}||$rank{'*'}) } keys %sections ) {
-        $doc->append( $sections{$s} );
+    for( @order ) {
+        $_->detach;
+        $doc->dom->append($_);
     }
 }
 

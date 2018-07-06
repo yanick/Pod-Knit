@@ -1,28 +1,70 @@
 package Pod::Knit;
+# ABSTRACT: Stitches together POD documentation
+
+=synopsis
+
+    my $knit = Pod::Knit->new( config => {
+        plugins => [
+            'Abstract',
+            'Version',
+            { Sort => { order => [qw/ NAME * VERSION /] },
+        ]
+    });
+
+    print $knit->munge_document( file => './lib/Pod/Knit.pm' )->as_string;
+
+
+=description
+
+C<Pod::Knit> is a POD processor heavily inspired by L<Pod::Weaver>. The main difference
+being that C<Pod::Weaver> uses a L<Pod::Elemental> DOM to represent and transform
+the POD document, whereas C<Pod::Knit> uses a XML representation and L<Web::Query>.
+
+This module mostly take care of taking in the desired configuration, and
+transform POD documents based on it.
+
+=cut
 
 use 5.20.0;
-
 use warnings;
 
-use Pod::Simple::DumpAsXML;
 use Path::Tiny;
-use Web::Query;
 use YAML;
-use Class::Load qw/ load_class /;
+
+use List::Util qw/ reduce /;
+
+use Pod::Knit::Document;
 
 use Moose;
 
-use experimental 'signatures';
+use experimental 'signatures', 'postderef';
 
-with 'Pod::Knit::Output::POD';
-with 'Pod::Knit::Output::XML';
+=attribute config_file
 
-has "config_file" => (
+Configuration file for the knit pipeline. Must be a YAML file.
+
+=default F<./knit.yml> if the file exists.
+
+=cut
+
+has config_file => (
     isa => 'Str',
     is => 'ro',
+    lazy => 1,
+    default => sub {
+        -f 'knit.yml' ? 'knit.yml' : undef;
+    },
 );
 
-has "config" => (
+=attribute config
+
+Hashref of the configuration for the knit pipeline. 
+
+=default the content of the C<config_file>, if it exists.
+
+=cut
+
+has config => (
     is => 'ro',
     lazy => 1,
     default => sub {
@@ -32,95 +74,80 @@ has "config" => (
     },
 );
 
-has "source_file" => (
-    isa => 'Str',
-    is => 'ro',
-);
+=attribute stash
 
-has "source_code" => (
+Hashref of values accessible to the knit pipeline. 
+Can be used to set values required by various plugins,
+like the distribution's version, the list of authors, etc.
+
+=default the C<stash> value of the config attribute, if presents. Else an
+        empty hashref.
+
+=cut
+
+has stash => (
     is => 'ro',
     lazy => 1,
-    default => sub($self) {
-        path( $self->source_file )->slurp;
+    default => sub {
+        $_[0]->config->{stash} || {}
     },
 );
 
-has "_plugins" => (
+
+has plugins => (
     traits => [ 'Array' ],
     is => 'ro',
     lazy => 1,
     default => sub {
         my $self = shift;
 
-        load_class( 'Pod::Knit::Plugin::HeadsToSections' );
-
-        my @plugins = (
-            Pod::Knit::Plugin::HeadsToSections->new(
-                knit => $self
-            )
-        );
-
+        my @plugins;
         if( my $plugins = $self->config->{plugins} ) {
             for my $p ( @$plugins ) {
                 my( $plugin, $args ) = ref $p ? %$p : ( $p );
 
                 $plugin = 'Pod::Knit::Plugin::' . $plugin;
 
-                load_class( $plugin );
+                use Module::Runtime qw/ use_module /;
+                use_module( $plugin );
 
-                push @plugins, $plugin->new( %$args, knit => $self );
+                push @plugins, $plugin->new( 
+                    stash => $self->stash,
+                    %$args, knit => $self );
             }
         }
 
         \@plugins;
     },
     handles => {
-        plugins => 'elements',
+        all_plugins => 'elements',
     },
 );
 
-has "parser" => (
-    is => 'ro',
-    lazy => 1,
-    default => sub {
-        Pod::Simple::DumpAsXML->new;
-    },
-);
+sub munging_plugins ($self) {
+    grep { $_->can( 'munge' ) } $self->all_plugins;
+}
 
-has "document" => (
-    is => 'ro',
-    lazy => 1,
-    default => sub {
-        my $self = shift;
+=method munge_document
 
-        my $parser = $self->parser;
-        $parser->output_string( \my $xml );
+=signature my $doc = $knit->munge_document( $original )
 
-        for my $plugin ( $self->plugins ) {
-            next unless $plugin->can( 'setup_parser' );
-            $plugin->setup_parser( $parser );
-        }
+=signature my $doc = $knit->munge_document( %args )
 
-        $parser->parse_string_document( $self->source_code );
+Takes a L<Pod::Knit::Document> and returns a new document
+munged by the plugins.
 
-        my $doc = Pod::Knit::Doc->new_from_html($xml, { no_space_compacting
-            => 1 });
+If the input is C<%args>, it is a shortcut for
 
-        $doc = bless $doc, 'Pod::Knit::Doc';
+    my $doc = $knit->munge_document( 
+        Pod::Knit::Document->new( knit => $knit, %args )
+    );
 
-        for my $plugin ( $self->plugins ) {
-            next unless $plugin->can( 'preprocess' );
-            $plugin->preprocess( $doc );
-        }
+=cut
 
-        for my $plugin ( $self->plugins ) {
-            next unless $plugin->can( 'transform' );
-            $plugin->transform( $doc );
-        }
-
-        $doc;
-    },
-);
-
+sub munge_document($self,@rest) {
+    my( $doc ) = ( @rest == 1 ) ? @rest : ( Pod::Knit::Document->new( knit => $self, @rest ) );
+    return reduce { $b->munge($a->clone) } $doc, $self->munging_plugins;
+}
 
 1;

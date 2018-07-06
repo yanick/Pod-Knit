@@ -1,15 +1,24 @@
 ---
 plugins:
     - Abstract
-    - Authors:
-        authors:
-            - Yanick Champoux
+    - Attributes
     - Methods
+    - NamedSections:
+        sections:
+            - synopsis
+            - description
+    - Version
+    - Authors
+    - Legal
     - Sort:
         order:
-            - NAME
-            - SYNOPSIS
-            - DESCRIPTION
-            - METHODS
-            - '*'
-            - AUTHORS
+          - NAME
+          - VERSION
+          - SYNOPSIS
+          - DESCRIPTION
+          - ATTRIBUTES
+          - METHODS
+          - '*'
+          - AUTHORS
+          - AUTHOR
+          - COPYRIGHT AND LICENSE

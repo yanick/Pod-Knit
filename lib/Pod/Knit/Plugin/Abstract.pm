@@ -3,24 +3,43 @@ package Pod::Knit::Plugin::Abstract;
 use strict;
 use warnings;
 
+use Log::Any '$log', prefix => 'Knit::Abstract: ';
+
+use XML::Writer::Simpler;
+
 use Moose;
 
-use Web::Query;
+extends 'Pod::Knit::Plugin'; 
+with 'Pod::Knit::DOM::WebQuery';
 
-with 'Pod::Knit::Plugin';
+use experimental qw/
+    signatures
+    postderef
+/;
 
-sub transform {
-    my( $self, $doc ) = @_;
+sub munge($self,$doc) {
 
-    my( $package, $abstract ) = 
-        $self->source_code =~ /^\s*package\s+(\S+);\s*^\s*#\s*ABSTRACT:\s*(.*?)\s*$/m
-            or return;
+    $log->debug( 'transforming' );
 
-    $doc->section( 'name' )->append( 
-        '<para>'.
-        join( ' - ', $package, $abstract )
-        .'</para>'
-    );
+    my ( $package, $abstract );
+    for ( $doc->content ) {
+        no warnings 'uninitialized';
+        ( $package )  = /^ \s* package \s+ (\S+);/mx;
+        ( $abstract ) = /^ \s* \# \s* ABSTRACT: \s* (.*?) $/mx;
+    }
+
+    my $section = XML::Writer::Simpler->new( OUTPUT => 'self' );
+
+    no warnings 'uninitialized';
+
+    $section->tag( section => sub {
+            $section->tag( 'section', [ class => 'name' ], sub {
+                $section->tag( 'head1' => 'NAME' );
+                $section->tag( 'para' => join ' - ', $package, $abstract );
+            });
+    });
+
+    $doc->dom->append( $section->to_string );
 }
 
 

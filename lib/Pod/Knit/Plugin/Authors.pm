@@ -3,38 +3,54 @@ package Pod::Knit::Plugin::Authors;
 use strict;
 use warnings;
 
+use Web::Query;
 use Moose;
 
-use Web::Query;
+extends 'Pod::Knit::Plugin';
+with 'Pod::Knit::DOM::WebQuery';
 
-with 'Pod::Knit::Plugin';
+use experimental 'signatures';
 
 has "authors" => (
+    traits => [ 'Array' ],
     isa => 'ArrayRef',
     is => 'ro',
     lazy => 1,
+    handles => {
+        all_authors => 'elements',
+    },
     default => sub {
         my $self = shift;
         [];
     },
 );
 
-sub transform {
-    my( $self, $doc ) = @_;
+sub munge($self, $doc) {
 
-    my $section = wq( '<over-text>' );
-    for ( @{ $self->authors } ) {
-        $section->append(
-            '<item-text>' . $_ . '</item-text>'
+    my @authors = $self->all_authors
+        or return;
+
+    my $title = 'AUTHORS';
+
+    if ( @authors == 1 ) {
+        chop $title;
+        $doc->find_or_create_section(
+            $title,
+            1,
+            $title,
+            para => @authors
         );
     }
-
-    $doc->section( 'authors' )->append(
-        $section
-    );
-}
-
-
-
+    else {
+        $doc->dom->append(
+            $self->xml_write( section => [
+                head1 => $title,
+                'over-text' => [
+                    map { ('item-text' => $_) } @authors
+                ]
+            ])
+        )
+    }
+} 
 
 1;

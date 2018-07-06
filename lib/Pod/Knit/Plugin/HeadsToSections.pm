@@ -8,7 +8,8 @@ use List::AllUtils qw/ part /;
 
 use Moose;
 
-with 'Pod::Knit::Plugin';
+extends 'Pod::Knit::Plugin';
+with 'Pod::Knit::DOM::WebQuery';
 
 sub preprocess {
     my( $self, $doc ) = @_;
@@ -43,9 +44,6 @@ sub preprocess {
     }
 
 }
-
-
-
 
 1;
 
