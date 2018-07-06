@@ -21,7 +21,7 @@ has "authors" => (
     },
     default => sub {
         my $self = shift;
-        [];
+        $self->stash->{authors} || [];
     },
 );
 
