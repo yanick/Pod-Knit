@@ -1,4 +1,28 @@
 package Pod::Knit::Plugin::Abstract;
+# ABSTRACT: add the NAME section to the POD
+
+=synopsis
+
+In F<knit.yml>
+
+    plugins
+        - ABSTRACT 
+
+=description
+
+Extracts the name and abstract from the file and add them to the 
+POD. 
+
+    package My::Foo;
+    # ABSTRACT: does the thing
+
+will generate
+
+    =head1 NAME 
+
+    My::Foo - does the thing
+
+=cut
 
 use strict;
 use warnings;
@@ -32,7 +56,7 @@ sub munge($self,$doc) {
         para => join ' - ', grep { $_ } $package, $abstract 
     );
 
-}
+};
 
 
 

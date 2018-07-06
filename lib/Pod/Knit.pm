@@ -16,12 +16,15 @@ package Pod::Knit;
 
 =description
 
-C<Pod::Knit> is a POD processor heavily inspired by L<Pod::Weaver>. The main difference
-being that C<Pod::Weaver> uses a L<Pod::Elemental> DOM to represent and transform
-the POD document, whereas C<Pod::Knit> uses a XML representation and L<Web::Query>.
+C<Pod::Knit> is a POD processor heavily inspired by L<Pod::Weaver>. The main
+difference being that C<Pod::Weaver> uses a L<Pod::Elemental> DOM to
+represent and transform the POD document, whereas C<Pod::Knit> uses
+representation of the document (the tags used in that representation are
+given in L<Pod::Knit::Document>).
 
 This module mostly take care of taking in the desired configuration, and
-transform POD documents based on it.
+transform POD documents based on it. For documentation of the system as 
+a whole, peer at L<Pod::Knit::Manual>.
 
 =cut
 
@@ -43,6 +46,36 @@ use experimental 'signatures', 'postderef';
 
 Configuration file for the knit pipeline. Must be a YAML file.
 
+E.g.:
+
+---
+stash:
+    author: Yanick Champoux <yanick@cpan.org>
+plugins:
+    - Abstract
+    - Attributes
+    - Methods
+    - NamedSections:
+        sections:
+            - synopsis
+            - description
+    - Version
+    - Authors
+    - Legal
+    - Sort:
+        order:
+          - NAME
+          - VERSION
+          - SYNOPSIS
+          - DESCRIPTION
+          - ATTRIBUTES
+          - METHODS
+          - '*'
+          - AUTHORS
+          - AUTHOR
+          - COPYRIGHT AND LICENSE
+
+
 =default F<./knit.yml> if the file exists.
 
 =cut
@@ -60,9 +93,14 @@ has config_file => (
 
 Hashref of the configuration for the knit pipeline. 
 
+The configuration recognizes two keys: C<stash>, which value is a hashref
+of configuration elements to pass to the plugins, and C<plugins>, the
+arrayref of plugins and (optionally) their arguments. 
+See C<config_file> for an example.
+
 =default the content of the C<config_file>, if it exists.
 
-=cut
+=cut 
 
 has config => (
     is => 'ro',

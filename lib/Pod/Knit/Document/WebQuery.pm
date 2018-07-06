@@ -1,7 +1,10 @@
 package Pod::Knit::Document::WebQuery;     
+# ABSTRACT: manipulate Pod::Knit documents using Web::Query
 
 use strict;
 use warnings;
+
+use Web::Query::LibXML;
 
 use Moose::Role;
 

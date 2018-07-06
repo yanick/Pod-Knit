@@ -1,4 +1,18 @@
 package Dist::Zilla::Plugin::PodKnit;
+# ABSTRACT: craft from warm and fuzzy documentation for your Perl code
+
+
+=synopsis
+
+In C<dist.ini>:
+
+    [PodKnit]
+
+=description
+
+Filter all C<.pl> and C<.pm> files through L<Pod::Knit>.
+
+=cut
 
 use strict;
 use warnings;
@@ -41,7 +55,8 @@ use experimental 'postderef';
 sub munge_files {
   my ($self) = @_;
 
-  $self->munge_file($_) for $self->found_files->@*;
+  $self->munge_file($_) 
+    for grep { /\.p[lm]$/ } $self->found_files->@*;
 }
 
 sub munge_file {

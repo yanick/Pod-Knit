@@ -1,5 +1,6 @@
 package Pod::Knit::DOM::Mojo;
 
+
 use Moose::Util qw/ apply_all_roles /;
 
 use Moose::Role;

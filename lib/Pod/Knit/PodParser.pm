@@ -1,4 +1,12 @@
 package Pod::Knit::PodParser;
+# ABSTRACT: parse POD into an XML documen
+
+=descriptio
+
+Uses L<Pod::Simple::PullParser> to convert a POD document 
+into XML.
+
+=cut
 
 use strict;
 use warnings;
