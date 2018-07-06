@@ -35,7 +35,7 @@ sub munge($self,$doc) {
     $section->tag( section => sub {
             $section->tag( 'section', [ class => 'name' ], sub {
                 $section->tag( 'head1' => 'NAME' );
-                $section->tag( 'para' => join ' - ', $package, $abstract );
+                $section->tag( 'para' => join ' - ', grep { $_ } $package, $abstract );
             });
     });
 
