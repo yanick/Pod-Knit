@@ -30,6 +30,7 @@ on 'test' => sub {
   requires "File::Spec" => "0";
   requires "IO::Handle" => "0";
   requires "IPC::Open3" => "0";
+  requires "Software::License::Artistic_2_0" => "0";
   requires "Test::More" => "0";
   requires "Test::Most" => "0";
 };
