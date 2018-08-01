@@ -14,7 +14,6 @@ cpanfile
 doap.xml
 eventual.pl
 knit.yml
-lib/Dist/Zilla/Plugin/PodKnit.pm
 lib/Pod/Knit.pm
 lib/Pod/Knit/DOM/Mojo.pm
 lib/Pod/Knit/DOM/WebQuery.pm
