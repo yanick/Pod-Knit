@@ -1,3 +1,4 @@
 /Pod-Knit*
 .build
 .prove
+.envrc
