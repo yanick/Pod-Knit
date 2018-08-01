@@ -1,6 +1,5 @@
 AUTHOR_PLEDGE
 CODE_OF_CONDUCT.md
-CONTRIBUTORS
 Changes
 INSTALL
 LICENSE
@@ -17,9 +16,12 @@ eventual.pl
 knit.yml
 lib/Dist/Zilla/Plugin/PodKnit.pm
 lib/Pod/Knit.pm
+lib/Pod/Knit/DOM/Mojo.pm
 lib/Pod/Knit/DOM/WebQuery.pm
 lib/Pod/Knit/Document.pm
+lib/Pod/Knit/Document/Mojo.pm
 lib/Pod/Knit/Document/WebQuery.pm
+lib/Pod/Knit/Manual.pm
 lib/Pod/Knit/Output/Pod.pm
 lib/Pod/Knit/Plugin.pm
 lib/Pod/Knit/Plugin/Abstract.pm
