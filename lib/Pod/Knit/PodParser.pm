@@ -1,12 +1,7 @@
 package Pod::Knit::PodParser;
+our $AUTHORITY = 'cpan:YANICK';
 # ABSTRACT: parse POD into an XML documen
-
-=descriptio
-
-Uses L<Pod::Simple::PullParser> to convert a POD document 
-into XML.
-
-=cut
+$Pod::Knit::PodParser::VERSION = '0.0.1';
 
 use strict;
 use warnings;
@@ -140,3 +135,49 @@ sub parse_pod($self, $end_cond = undef ) {
 }
 
 1;
+
+__END__
+
+=pod
+
+=encoding UTF-8
+
+Uses L<Pod::Simple::PullParser> to convert a POD document into XML.
+
+=head1 NAME
+
+Pod::Knit::PodParser - parse POD into an XML documen
+
+=head1 VERSION
+
+version 0.0.1
+
+=head1 POD ERRORS
+
+Hey! B<The above document had some coding errors, which are explained
+below:>
+
+=over
+
+=item Around line 5:
+
+Unknown directive: =descriptio
+
+=back
+
+=head1 AUTHOR
+
+Yanick Champoux <yanick@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2018 by Yanick Champoux.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+Full text of the license can be found in the F<LICENSE> file included in
+this distribution.
+
+=cut
+

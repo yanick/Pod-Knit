@@ -1,6 +1,7 @@
 package Pod::Knit::Document::Mojo;
+our $AUTHORITY = 'cpan:YANICK';
 # ABSTRACT: manipulate a Pod::Knit::Document using Mojo::DOM58
-
+$Pod::Knit::Document::Mojo::VERSION = '0.0.1';
 use strict;
 use warnings;
 
@@ -36,3 +37,35 @@ sub find_or_create_section( $self, $name, $level = 1, $class = $name, @rest ) {
 }
 
 1;
+
+__END__
+
+=pod
+
+=encoding UTF-8
+
+=head1 NAME
+
+Pod::Knit::Document::Mojo - manipulate a Pod::Knit::Document using
+Mojo::DOM58
+
+=head1 VERSION
+
+version 0.0.1
+
+=head1 AUTHOR
+
+Yanick Champoux <yanick@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2018 by Yanick Champoux.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+Full text of the license can be found in the F<LICENSE> file included in
+this distribution.
+
+=cut
+
